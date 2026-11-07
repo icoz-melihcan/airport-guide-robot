@@ -1,0 +1,197 @@
+<?xml version="1.0"?>
+<!--
+  Havalimani terminali (T seklinde koridor) - Gazebo Jetty
+  Ust gorunus (x ileri, y sol):
+    - Ana koridor : x -1.5 .. 9.0 , y -1.5 .. 1.5  (robot (0,0)'da baslar, +x'e bakar)
+    - Kavsak/yan koridor: x 9.0 .. 12.0 , y -8.0 .. 8.0
+    - A kapilari: sol kol sonu (y = +8)  -> MAVI panel
+    - B kapilari: sag kol sonu (y = -8)  -> SARI panel
+    - Kavsaktaki karsi duvarda (x = 12) yon tabelasi: solda MAVI (y=+1.0), sagda SARI (y=-1.0)
+-->
+<sdf version="1.10">
+  <world name="terminal">
+
+    <physics name="1ms" type="ignored">
+      <max_step_size>0.001</max_step_size>
+      <real_time_factor>1.0</real_time_factor>
+    </physics>
+
+    <!-- World'e kendi plugin'lerimizi yazdigimiz icin varsayilanlar YUKLENMEZ: hepsi elle -->
+    <plugin filename="gz-sim-physics-system" name="gz::sim::systems::Physics"/>
+    <plugin filename="gz-sim-user-commands-system" name="gz::sim::systems::UserCommands"/>
+    <plugin filename="gz-sim-scene-broadcaster-system" name="gz::sim::systems::SceneBroadcaster"/>
+    <plugin filename="gz-sim-sensors-system" name="gz::sim::systems::Sensors">
+      <render_engine>ogre2</render_engine>
+    </plugin>
+    <plugin filename="gz-sim-contact-system" name="gz::sim::systems::Contact"/>
+
+    <!-- Arka plan GRI olmali: mavimsi gokyuzu kameranin mavi maskesine girer! -->
+    <scene>
+      <ambient>0.6 0.6 0.6 1</ambient>
+      <background>0.85 0.85 0.85 1</background>
+      <grid>false</grid>
+    </scene>
+
+    <light type="directional" name="gunes">
+      <cast_shadows>false</cast_shadows>
+      <pose>0 0 10 0 0 0</pose>
+      <diffuse>0.9 0.9 0.9 1</diffuse>
+      <specular>0.2 0.2 0.2 1</specular>
+      <direction>-0.3 0.2 -0.9</direction>
+    </light>
+
+    <!-- ===================== ZEMIN ===================== -->
+    <model name="zemin">
+      <static>true</static>
+      <link name="link">
+        <collision name="collision">
+          <geometry><plane><normal>0 0 1</normal><size>60 60</size></plane></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><plane><normal>0 0 1</normal><size>60 60</size></plane></geometry>
+          <material>
+            <ambient>0.45 0.45 0.45 1</ambient>
+            <diffuse>0.45 0.45 0.45 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- ===================== DUVARLAR (yukseklik 2.5 m) ===================== -->
+    <model name="duvarlar">
+      <static>true</static>
+      <link name="link">
+        <!-- Ana koridor sol duvari -->
+        <collision name="ana_sol_c"><pose>3.75 1.6 1.25 0 0 0</pose><geometry><box><size>10.5 0.2 2.5</size></box></geometry></collision>
+        <visual name="ana_sol_v"><pose>3.75 1.6 1.25 0 0 0</pose><geometry><box><size>10.5 0.2 2.5</size></box></geometry>
+          <material><ambient>0.8 0.8 0.8 1</ambient><diffuse>0.8 0.8 0.8 1</diffuse></material></visual>
+        <!-- Ana koridor sag duvari -->
+        <collision name="ana_sag_c"><pose>3.75 -1.6 1.25 0 0 0</pose><geometry><box><size>10.5 0.2 2.5</size></box></geometry></collision>
+        <visual name="ana_sag_v"><pose>3.75 -1.6 1.25 0 0 0</pose><geometry><box><size>10.5 0.2 2.5</size></box></geometry>
+          <material><ambient>0.8 0.8 0.8 1</ambient><diffuse>0.8 0.8 0.8 1</diffuse></material></visual>
+        <!-- Arka duvar (robotun arkasi) -->
+        <collision name="arka_c"><pose>-1.6 0 1.25 0 0 0</pose><geometry><box><size>0.2 3.4 2.5</size></box></geometry></collision>
+        <visual name="arka_v"><pose>-1.6 0 1.25 0 0 0</pose><geometry><box><size>0.2 3.4 2.5</size></box></geometry>
+          <material><ambient>0.8 0.8 0.8 1</ambient><diffuse>0.8 0.8 0.8 1</diffuse></material></visual>
+        <!-- Kavsaktaki karsi duvar (yon tabelasi bunun uzerinde) -->
+        <collision name="karsi_c"><pose>12.1 0 1.25 0 0 0</pose><geometry><box><size>0.2 16.4 2.5</size></box></geometry></collision>
+        <visual name="karsi_v"><pose>12.1 0 1.25 0 0 0</pose><geometry><box><size>0.2 16.4 2.5</size></box></geometry>
+          <material><ambient>0.8 0.8 0.8 1</ambient><diffuse>0.8 0.8 0.8 1</diffuse></material></visual>
+        <!-- Yan koridor yakin duvar - sol (A) parcasi -->
+        <collision name="yakin_sol_c"><pose>8.9 4.75 1.25 0 0 0</pose><geometry><box><size>0.2 6.5 2.5</size></box></geometry></collision>
+        <visual name="yakin_sol_v"><pose>8.9 4.75 1.25 0 0 0</pose><geometry><box><size>0.2 6.5 2.5</size></box></geometry>
+          <material><ambient>0.8 0.8 0.8 1</ambient><diffuse>0.8 0.8 0.8 1</diffuse></material></visual>
+        <!-- Yan koridor yakin duvar - sag (B) parcasi -->
+        <collision name="yakin_sag_c"><pose>8.9 -4.75 1.25 0 0 0</pose><geometry><box><size>0.2 6.5 2.5</size></box></geometry></collision>
+        <visual name="yakin_sag_v"><pose>8.9 -4.75 1.25 0 0 0</pose><geometry><box><size>0.2 6.5 2.5</size></box></geometry>
+          <material><ambient>0.8 0.8 0.8 1</ambient><diffuse>0.8 0.8 0.8 1</diffuse></material></visual>
+        <!-- A kolu uc duvari -->
+        <collision name="uc_A_c"><pose>10.5 8.1 1.25 0 0 0</pose><geometry><box><size>3.4 0.2 2.5</size></box></geometry></collision>
+        <visual name="uc_A_v"><pose>10.5 8.1 1.25 0 0 0</pose><geometry><box><size>3.4 0.2 2.5</size></box></geometry>
+          <material><ambient>0.8 0.8 0.8 1</ambient><diffuse>0.8 0.8 0.8 1</diffuse></material></visual>
+        <!-- B kolu uc duvari -->
+        <collision name="uc_B_c"><pose>10.5 -8.1 1.25 0 0 0</pose><geometry><box><size>3.4 0.2 2.5</size></box></geometry></collision>
+        <visual name="uc_B_v"><pose>10.5 -8.1 1.25 0 0 0</pose><geometry><box><size>3.4 0.2 2.5</size></box></geometry>
+          <material><ambient>0.8 0.8 0.8 1</ambient><diffuse>0.8 0.8 0.8 1</diffuse></material></visual>
+      </link>
+    </model>
+
+    <!-- ===================== TABELALAR (saf renk + emissive = isiktan bagimsiz) ===================== -->
+    <!-- Kavsak yon tabelasi: A kapilari SOLDA (mavi) -->
+    <model name="tabela_yon_A">
+      <static>true</static>
+      <pose>11.97 1.0 1.5 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><box><size>0.05 1.0 0.6</size></box></geometry>
+          <material><ambient>0 0 1 1</ambient><diffuse>0 0 1 1</diffuse><specular>0 0 0 1</specular><emissive>0 0 1 1</emissive></material>
+        </visual>
+      </link>
+    </model>
+    <!-- Kavsak yon tabelasi: B kapilari SAGDA (sari) -->
+    <model name="tabela_yon_B">
+      <static>true</static>
+      <pose>11.97 -1.0 1.5 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><box><size>0.05 1.0 0.6</size></box></geometry>
+          <material><ambient>1 1 0 1</ambient><diffuse>1 1 0 1</diffuse><specular>0 0 0 1</specular><emissive>1 1 0 1</emissive></material>
+        </visual>
+      </link>
+    </model>
+    <!-- A kapisi paneli (sol kolun sonunda) -->
+    <model name="kapi_A">
+      <static>true</static>
+      <pose>10.5 7.97 1.4 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><box><size>2.0 0.05 1.2</size></box></geometry>
+          <material><ambient>0 0 1 1</ambient><diffuse>0 0 1 1</diffuse><specular>0 0 0 1</specular><emissive>0 0 1 1</emissive></material>
+        </visual>
+      </link>
+    </model>
+    <!-- B kapisi paneli (sag kolun sonunda) -->
+    <model name="kapi_B">
+      <static>true</static>
+      <pose>10.5 -7.97 1.4 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><box><size>2.0 0.05 1.2</size></box></geometry>
+          <material><ambient>1 1 0 1</ambient><diffuse>1 1 0 1</diffuse><specular>0 0 0 1</specular><emissive>1 1 0 1</emissive></material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- ===================== ENGELLER ===================== -->
+    <!-- Yere dusmus canta: 12 cm yuksek, LiDAR (22 cm) GOREMEZ -> bumper devreye girer -->
+    <model name="dusen_canta">
+      <static>true</static>
+      <pose>2.0 -0.25 0.06 0 0 0</pose>
+      <link name="link">
+        <collision name="collision"><geometry><box><size>0.45 0.5 0.12</size></box></geometry></collision>
+        <visual name="visual"><geometry><box><size>0.45 0.5 0.12</size></box></geometry>
+          <material><ambient>0.5 0.1 0.1 1</ambient><diffuse>0.5 0.1 0.1 1</diffuse></material></visual>
+      </link>
+    </model>
+    <!-- Bavul: LiDAR gorur -> engelden kacma -->
+    <model name="bavul">
+      <static>true</static>
+      <pose>4.5 0.35 0.35 0 0 0</pose>
+      <link name="link">
+        <collision name="collision"><geometry><box><size>0.5 0.45 0.7</size></box></geometry></collision>
+        <visual name="visual"><geometry><box><size>0.5 0.45 0.7</size></box></geometry>
+          <material><ambient>0.6 0.1 0.1 1</ambient><diffuse>0.6 0.1 0.1 1</diffuse></material></visual>
+      </link>
+    </model>
+    <!-- Kolon -->
+    <model name="kolon">
+      <static>true</static>
+      <pose>7.0 -0.25 1.25 0 0 0</pose>
+      <link name="link">
+        <collision name="collision"><geometry><cylinder><radius>0.25</radius><length>2.5</length></cylinder></geometry></collision>
+        <visual name="visual"><geometry><cylinder><radius>0.25</radius><length>2.5</length></cylinder></geometry>
+          <material><ambient>0.95 0.95 0.95 1</ambient><diffuse>0.95 0.95 0.95 1</diffuse></material></visual>
+      </link>
+    </model>
+    <!-- Kapi onu bekleme banklari (dekor; robotun yolunu kapatmaz) -->
+    <model name="bank_A">
+      <static>true</static>
+      <pose>9.3 4.5 0.225 0 0 0</pose>
+      <link name="link">
+        <collision name="collision"><geometry><box><size>0.45 1.4 0.45</size></box></geometry></collision>
+        <visual name="visual"><geometry><box><size>0.45 1.4 0.45</size></box></geometry>
+          <material><ambient>0.3 0.3 0.3 1</ambient><diffuse>0.3 0.3 0.3 1</diffuse></material></visual>
+      </link>
+    </model>
+    <model name="bank_B">
+      <static>true</static>
+      <pose>9.3 -4.5 0.225 0 0 0</pose>
+      <link name="link">
+        <collision name="collision"><geometry><box><size>0.45 1.4 0.45</size></box></geometry></collision>
+        <visual name="visual"><geometry><box><size>0.45 1.4 0.45</size></box></geometry>
+          <material><ambient>0.3 0.3 0.3 1</ambient><diffuse>0.3 0.3 0.3 1</diffuse></material></visual>
+      </link>
+    </model>
+
+  </world>
+</sdf>
