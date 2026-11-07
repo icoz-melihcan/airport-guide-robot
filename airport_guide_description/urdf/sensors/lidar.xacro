@@ -1,4 +1,63 @@
 <?xml version="1.0"?>
-<!-- LiDAR (Sorumlu: A) - C5'te doldurulacak -->
+<!-- LiDAR (Sorumlu: A) - link + joint + Gazebo gpu_lidar sensoru
+     Gazebo topic: /scan  ->  ROS: /scan (sensor_msgs/msg/LaserScan)
+     Yukseklik: yerden ~0.225 m (bavul, bank, kolon, duvar gorulur; 12 cm'lik dusen canta GORULMEZ) -->
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <link name="lidar_link">
+    <visual>
+      <geometry><cylinder radius="0.05" length="0.05"/></geometry>
+      <material name="siyah"/>
+    </visual>
+    <collision>
+      <geometry><cylinder radius="0.05" length="0.05"/></geometry>
+    </collision>
+    <inertial>
+      <mass value="0.2"/>
+      <inertia ixx="0.00017" ixy="0" ixz="0" iyy="0.00017" iyz="0" izz="0.00025"/>
+    </inertial>
+  </link>
+
+  <joint name="lidar_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="lidar_link"/>
+    <origin xyz="0.17 0 0.105"/>
+  </joint>
+
+  <gazebo reference="lidar_link">
+    <sensor name="lidar" type="gpu_lidar">
+      <topic>scan</topic>
+      <frame_id>lidar_link</frame_id>
+      <update_rate>10</update_rate>
+      <always_on>true</always_on>
+      <visualize>true</visualize>
+      <lidar>
+        <scan>
+          <horizontal>
+            <samples>360</samples>
+            <resolution>1</resolution>
+            <min_angle>-3.14159</min_angle>
+            <max_angle>3.14159</max_angle>
+          </horizontal>
+          <vertical>
+            <samples>1</samples>
+            <resolution>1</resolution>
+            <min_angle>0</min_angle>
+            <max_angle>0</max_angle>
+          </vertical>
+        </scan>
+        <range>
+          <min>0.12</min>
+          <max>10.0</max>
+          <resolution>0.01</resolution>
+        </range>
+        <noise>
+          <type>gaussian</type>
+          <mean>0.0</mean>
+          <stddev>0.01</stddev>
+        </noise>
+      </lidar>
+    </sensor>
+  </gazebo>
+
 </robot>
