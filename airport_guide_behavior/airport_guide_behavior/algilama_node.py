@@ -97,7 +97,7 @@ class AlgilamaNode(Node):
     def bumper_cb(self, msg):
         if len(msg.contacts) > 0:
             if self.simdi() - self.son_temas > 1.0:
-                self.get_logger().warn('BUMPER: temas algilandi!')
+                self.get_logger().warning('BUMPER: temas algilandi!')
             self.son_temas = self.simdi()
 
     def marker_yayinla(self):
