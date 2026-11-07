@@ -1,3 +1,7 @@
+# ROS 2 <-> Gazebo kopru ayarlari (ros_gz_bridge / parameter_bridge)
+# GZ_TO_ROS: Gazebo'dan ROS'a | ROS_TO_GZ: ROS'tan Gazebo'ya
+
+# ---------------- Temel (B - C4) ----------------
 - ros_topic_name: "clock"
   gz_topic_name: "clock"
   ros_type_name: "rosgraph_msgs/msg/Clock"
@@ -36,15 +40,15 @@
   direction: GZ_TO_ROS
 
 # ---------------- Kamera (B - C6) ----------------
-# - ros_topic_name: "camera/image_raw"
-#   gz_topic_name: "camera/image_raw"
-#   ros_type_name: "sensor_msgs/msg/Image"
-#   gz_type_name: "gz.msgs.Image"
-#   direction: GZ_TO_ROS
+- ros_topic_name: "camera/image_raw"
+  gz_topic_name: "camera/image_raw"
+  ros_type_name: "sensor_msgs/msg/Image"
+  gz_type_name: "gz.msgs.Image"
+  direction: GZ_TO_ROS
 
 # ---------------- Bumper (B - C6) ----------------
-# - ros_topic_name: "bumper"
-#   gz_topic_name: "bumper"
-#   ros_type_name: "ros_gz_interfaces/msg/Contacts"
-#   gz_type_name: "gz.msgs.Contacts"
-#   direction: GZ_TO_ROS
+- ros_topic_name: "bumper"
+  gz_topic_name: "bumper"
+  ros_type_name: "ros_gz_interfaces/msg/Contacts"
+  gz_type_name: "gz.msgs.Contacts"
+  direction: GZ_TO_ROS

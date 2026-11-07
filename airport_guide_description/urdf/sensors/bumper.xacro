@@ -1,4 +1,46 @@
 <?xml version="1.0"?>
-<!-- Bumper (Sorumlu: B) - C6'da doldurulacak -->
+<!-- Bumper / temas sensoru (Sorumlu: B entegrasyon + gorsellestirme, A davranis tepkisi)
+     On tamponda ince kutu, yerden 0.06-0.12 m (LiDAR'in goremedigi alcak engeller icin).
+     Gazebo topic: /bumper  ->  ROS: /bumper (ros_gz_interfaces/msg/Contacts) -->
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <!-- Genislik 0.54 m: tekerlerin dis kenarini (+-0.25 m) da kapsar, yoksa teker kosesi
+       engele surtunur ama bumper hic dokunmaz -->
+  <link name="bumper_link">
+    <visual>
+      <geometry><box size="0.04 0.54 0.06"/></geometry>
+      <material name="kirmizi"/>
+    </visual>
+    <collision>
+      <geometry><box size="0.04 0.54 0.06"/></geometry>
+    </collision>
+    <!-- Atalet ana dosyadaki makrodan hesaplaniyor (elle yazilan degerler gecersizdi) -->
+    <xacro:kutu_atalet m="0.1" x="0.04" y="0.54" z="0.06"/>
+  </link>
+
+  <joint name="bumper_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="bumper_link"/>
+    <origin xyz="0.27 0 -0.03"/>
+  </joint>
+
+  <!-- ONEMLI: fixed joint'i KORU (reference = JOINT adi). Korunmazsa bumper_link base_link'e
+       gomulur, collision adi degisir ve sensor HIC tetiklenmez. -->
+  <gazebo reference="bumper_joint">
+    <preserveFixedJoint>true</preserveFixedJoint>
+  </gazebo>
+
+  <gazebo reference="bumper_link">
+    <sensor name="bumper" type="contact">
+      <topic>bumper</topic>
+      <update_rate>30</update_rate>
+      <always_on>true</always_on>
+      <contact>
+        <!-- URDF->SDF donusumunde isimsiz collision'in adi "<link_adi>_collision" olur -->
+        <collision>bumper_link_collision</collision>
+        <topic>bumper</topic>
+      </contact>
+    </sensor>
+  </gazebo>
+
 </robot>
