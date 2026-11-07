@@ -32,7 +32,7 @@ class GuideNode(Node):
 
         # ---------------- Parametreler (ros2 run ... --ros-args -p ad:=deger) ----------------
         self.hedef = self._prm('hedef', 'A')
-        self.hiz = self._prm('hiz', 0.35)                   # normal ileri hiz (m/s)
+        self.hiz = self._prm('hiz', 0.27)                   # normal ileri hiz (m/s)
         self.yavas_hiz = self._prm('yavas_hiz', 0.15)       # engel/duvar yakinken hiz
         self.donus_hizi = self._prm('donus_hizi', 0.6)      # en buyuk donus hizi (rad/s)
         self.yari_genislik = self._prm('yari_genislik', 0.36)   # robot yari genisligi + pay (m)
