@@ -1,0 +1,4 @@
+<?xml version="1.0"?>
+<!-- LiDAR (Sorumlu: A) - C5'te doldurulacak -->
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+</robot>
