@@ -167,6 +167,7 @@
   <xacro:include filename="sensors/lidar.xacro"/>
   <xacro:include filename="sensors/camera.xacro"/>
   <xacro:include filename="sensors/bumper.xacro"/>
+  <xacro:include filename="bagaj.xacro"/>
 
   <!-- ===================== GAZEBO PLUGIN'LERI ===================== -->
   <gazebo>

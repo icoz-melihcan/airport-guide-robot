@@ -1,0 +1,158 @@
+<?xml version="1.0"?>
+<!--
+  Bagaj modulu: kafesli raf + surtunmesiz kayan valiz
+  - Raf direge sabit (yerden 0.42 m). Etrafinda 14 dikey demir + ust korkuluk.
+  - Valiz rafa 3 eklemle bagli: ileri-geri (x), saga-sola (y), kendi etrafinda donme (yaw).
+    Eklemlerde surtunme = 0, sonum = 0 -> robot hizlanip donerken valiz serbestce kayar.
+  - Eklem limitleri demirlerin ic yuzune gore hesaplandi: valiz demire dayaninca durur.
+    (Ayni robotun linkleri Gazebo'da birbirine carpmaz; bu yuzden "demir tutuyor" etkisini
+     limitler sagliyor, demirler limitin tam bittigi yerde duruyor.)
+  - LiDAR duzlemi 0.225 m: rafin (0.42 m) altinda kalir. Kamera gorus alanina girmez.
+-->
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <material name="bordo"><color rgba="0.45 0.08 0.12 1"/></material>
+  <material name="metal"><color rgba="0.70 0.70 0.72 1"/></material>
+
+  <!-- ===== OLCULER ===== -->
+  <xacro:property name="raf_x" value="0.32"/>
+  <xacro:property name="raf_y" value="0.44"/>
+  <xacro:property name="raf_z" value="0.02"/>
+  <xacro:property name="demir_r" value="0.008"/>
+  <xacro:property name="demir_boy" value="0.28"/>
+  <xacro:property name="demir_px" value="0.15"/>   <!-- on/arka demir sirasi (raf merkezinden) -->
+  <xacro:property name="demir_py" value="0.21"/>   <!-- sag/sol demir sirasi -->
+
+  <xacro:property name="valiz_x" value="0.22"/>
+  <xacro:property name="valiz_y" value="0.32"/>
+  <xacro:property name="valiz_z" value="0.38"/>
+  <xacro:property name="valiz_kutle" value="1.5"/>
+
+  <!-- Kayma limitleri: demir ic yuzu (0.142 / 0.202) - valiz yarisi - donme payi -->
+  <xacro:property name="kay_x" value="0.016"/>
+  <xacro:property name="kay_y" value="0.030"/>
+  <xacro:property name="don_lim" value="0.08"/>    <!-- ~4.6 derece -->
+
+  <!-- ===== RAF + KAFES ===== -->
+  <xacro:macro name="demir" params="x y">
+    <visual>
+      <origin xyz="${x} ${y} ${raf_z/2 + demir_boy/2}"/>
+      <geometry><cylinder radius="${demir_r}" length="${demir_boy}"/></geometry>
+      <material name="metal"/>
+    </visual>
+  </xacro:macro>
+
+  <link name="raf_link">
+    <visual>
+      <geometry><box size="${raf_x} ${raf_y} ${raf_z}"/></geometry>
+      <material name="gri"/>
+    </visual>
+    <collision>
+      <geometry><box size="${raf_x} ${raf_y} ${raf_z}"/></geometry>
+    </collision>
+
+    <!-- on sira (5) ve arka sira (5) -->
+    <xacro:demir x="${demir_px}"  y="-0.21"/>
+    <xacro:demir x="${demir_px}"  y="-0.105"/>
+    <xacro:demir x="${demir_px}"  y="0"/>
+    <xacro:demir x="${demir_px}"  y="0.105"/>
+    <xacro:demir x="${demir_px}"  y="0.21"/>
+    <xacro:demir x="${-demir_px}" y="-0.21"/>
+    <xacro:demir x="${-demir_px}" y="-0.105"/>
+    <xacro:demir x="${-demir_px}" y="0"/>
+    <xacro:demir x="${-demir_px}" y="0.105"/>
+    <xacro:demir x="${-demir_px}" y="0.21"/>
+    <!-- yan siralar (koseler zaten var, aradaki 2'ser demir) -->
+    <xacro:demir x="-0.05" y="${demir_py}"/>
+    <xacro:demir x="0.05"  y="${demir_py}"/>
+    <xacro:demir x="-0.05" y="${-demir_py}"/>
+    <xacro:demir x="0.05"  y="${-demir_py}"/>
+
+    <!-- ust korkuluk -->
+    <xacro:property name="ust_z" value="${raf_z/2 + demir_boy}"/>
+    <visual>
+      <origin xyz="${demir_px} 0 ${ust_z}"/>
+      <geometry><box size="0.016 ${2*demir_py + 0.016} 0.016"/></geometry>
+      <material name="metal"/>
+    </visual>
+    <visual>
+      <origin xyz="${-demir_px} 0 ${ust_z}"/>
+      <geometry><box size="0.016 ${2*demir_py + 0.016} 0.016"/></geometry>
+      <material name="metal"/>
+    </visual>
+    <visual>
+      <origin xyz="0 ${demir_py} ${ust_z}"/>
+      <geometry><box size="${2*demir_px + 0.016} 0.016 0.016"/></geometry>
+      <material name="metal"/>
+    </visual>
+    <visual>
+      <origin xyz="0 ${-demir_py} ${ust_z}"/>
+      <geometry><box size="${2*demir_px + 0.016} 0.016 0.016"/></geometry>
+      <material name="metal"/>
+    </visual>
+
+    <xacro:kutu_atalet m="0.6" x="${raf_x}" y="${raf_y}" z="${raf_z}"/>
+  </link>
+  <joint name="raf_joint" type="fixed">
+    <parent link="direk_link"/>
+    <child link="raf_link"/>
+    <!-- direk merkezi yerden 0.70 m -> raf merkezi 0.42 m; arka kenar direge dayali -->
+    <origin xyz="0.19 0 -0.28"/>
+  </joint>
+
+  <!-- ===== VALIZ: x -> y -> yaw eklem zinciri ===== -->
+  <!-- Ara linkler sadece eklem zinciri icin; kucuk ama sifir olmayan kutle (Gazebo istiyor) -->
+  <xacro:macro name="ara_link" params="ad">
+    <link name="${ad}">
+      <inertial>
+        <mass value="0.05"/>
+        <inertia ixx="1e-5" ixy="0" ixz="0" iyy="1e-5" iyz="0" izz="1e-5"/>
+      </inertial>
+    </link>
+  </xacro:macro>
+  <xacro:ara_link ad="valiz_x_link"/>
+  <xacro:ara_link ad="valiz_y_link"/>
+
+  <joint name="valiz_x_joint" type="prismatic">
+    <parent link="raf_link"/>
+    <child link="valiz_x_link"/>
+    <origin xyz="0 0 ${raf_z/2 + valiz_z/2}"/>
+    <axis xyz="1 0 0"/>
+    <limit lower="${-kay_x}" upper="${kay_x}" effort="100" velocity="10"/>
+    <dynamics damping="0.0" friction="0.0"/>
+  </joint>
+
+  <joint name="valiz_y_joint" type="prismatic">
+    <parent link="valiz_x_link"/>
+    <child link="valiz_y_link"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="${-kay_y}" upper="${kay_y}" effort="100" velocity="10"/>
+    <dynamics damping="0.0" friction="0.0"/>
+  </joint>
+
+  <link name="valiz_link">
+    <visual>
+      <geometry><box size="${valiz_x} ${valiz_y} ${valiz_z}"/></geometry>
+      <material name="bordo"/>
+    </visual>
+    <!-- tutma sapi -->
+    <visual>
+      <origin xyz="0 0 ${valiz_z/2 + 0.015}"/>
+      <geometry><box size="0.04 0.12 0.03"/></geometry>
+      <material name="siyah"/>
+    </visual>
+    <collision>
+      <geometry><box size="${valiz_x} ${valiz_y} ${valiz_z}"/></geometry>
+    </collision>
+    <xacro:kutu_atalet m="${valiz_kutle}" x="${valiz_x}" y="${valiz_y}" z="${valiz_z}"/>
+  </link>
+
+  <joint name="valiz_yaw_joint" type="revolute">
+    <parent link="valiz_y_link"/>
+    <child link="valiz_link"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="${-don_lim}" upper="${don_lim}" effort="100" velocity="10"/>
+    <dynamics damping="0.0" friction="0.0"/>
+  </joint>
+
+</robot>
